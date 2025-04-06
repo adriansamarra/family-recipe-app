@@ -1,35 +1,42 @@
-import React from "react";
-import recipes from "../data/recipes.json";
+import React, { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
 import { getThisWeek } from "../utils/weeklyPlanner";
 import { Link } from "react-router-dom";
 
 export function ThisWeek() {
-  const selected = getThisWeek();
-  const selectedRecipes = recipes.filter((r) => selected.includes(r.id));
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  if (selectedRecipes.length === 0) {
-    return (
-      <div style={{ padding: "2rem" }}>
-        <h2>This Week's Menu</h2>
-        <p>No recipes selected yet.</p>
-        <Link to="/">← Back to recipes</Link>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const fetchWeek = async () => {
+      const weekIds = await getThisWeek();
+      const snapshot = await getDocs(collection(db, "recipes"));
+      const all = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      const weekRecipes = all.filter((r) => weekIds.includes(r.id));
+      setRecipes(weekRecipes);
+      setLoading(false);
+    };
+
+    fetchWeek();
+  }, []);
 
   return (
     <div style={{ padding: "2rem" }}>
       <h2>This Week's Menu</h2>
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {selectedRecipes.map((recipe) => (
-          <li key={recipe.id} style={{ marginBottom: "1rem" }}>
-            <Link to={`/recipe/${recipe.id}`}>
-              <strong>{recipe.title}</strong>
-            </Link>
-          </li>
-        ))}
-      </ul>
-      <Link to="/">← Back to recipes</Link>
+      {loading ? (
+        <p>Loading...</p>
+      ) : recipes.length === 0 ? (
+        <p>No recipes selected for this week.</p>
+      ) : (
+        <ul>
+          {recipes.map((r) => (
+            <li key={r.id}>
+              <Link to={`/recipe/${r.id}`}>{r.title}</Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
