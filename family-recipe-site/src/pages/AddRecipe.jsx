@@ -50,8 +50,12 @@ export function AddRecipe() {
     try {
       const recipeToSave = {
         ...recipe,
+        ingredients: Array.isArray(recipe.ingredients)
+          ? recipe.ingredients
+          : recipe.ingredients?.split?.("\n") || [],
         timestamp: new Date()
       };
+      
 
       await addDoc(collection(db, "recipes"), recipeToSave);
       setSuccess(true);
