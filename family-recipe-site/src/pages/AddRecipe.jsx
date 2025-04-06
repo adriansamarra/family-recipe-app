@@ -3,13 +3,14 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 export function AddRecipe() {
+  const [mode, setMode] = useState("url"); // "url" or "manual"
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [recipe, setRecipe] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const SCRAPER_API = "https://family-recipe-app.onrender.com"; // 🔁 Replace with your Render backend URL
+  const SCRAPER_API = "https://family-recipe-app.onrender.com"; // replace with your actual URL
 
   const handleFetch = async () => {
     setLoading(true);
@@ -31,11 +32,24 @@ export function AddRecipe() {
     setLoading(false);
   };
 
+  const handleManualStart = () => {
+    setRecipe({
+      id: `manual-${Date.now()}`,
+      title: "",
+      category: "",
+      image: "",
+      ingredients: [],
+      instructions: "",
+      tags: ["new"]
+    });
+    setSuccess(false);
+    setError("");
+  };
+
   const handleSave = async () => {
     try {
       const recipeToSave = {
         ...recipe,
-        id: recipe.id || `firebase-${Date.now()}`,
         timestamp: new Date()
       };
 
@@ -51,23 +65,54 @@ export function AddRecipe() {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h2>Add Recipe from URL</h2>
+      <h2>Add a New Recipe</h2>
 
-      <input
-        type="text"
-        placeholder="Paste recipe URL..."
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        style={{ width: "100%", padding: "0.5rem", marginBottom: "1rem" }}
-      />
+      {/* Toggle between modes */}
+      <div style={{ marginBottom: "1rem" }}>
+        <label>
+          <input
+            type="radio"
+            value="url"
+            checked={mode === "url"}
+            onChange={() => setMode("url")}
+          />
+          &nbsp;From URL
+        </label>
+        &nbsp;&nbsp;
+        <label>
+          <input
+            type="radio"
+            value="manual"
+            checked={mode === "manual"}
+            onChange={() => setMode("manual")}
+          />
+          &nbsp;Manual Entry
+        </label>
+      </div>
 
-      <button onClick={handleFetch} disabled={loading}>
-        {loading ? "Fetching..." : "Fetch Recipe"}
-      </button>
+      {/* URL Entry Mode */}
+      {mode === "url" && (
+        <>
+          <input
+            type="text"
+            placeholder="Paste recipe URL..."
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            style={{ width: "100%", padding: "0.5rem", marginBottom: "1rem" }}
+          />
+          <button onClick={handleFetch} disabled={loading}>
+            {loading ? "Fetching..." : "Fetch Recipe"}
+          </button>
+          {error && <p style={{ color: "red" }}>{error}</p>}
+        </>
+      )}
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {success && <p style={{ color: "green" }}>✅ Recipe saved to cloud!</p>}
+      {/* Manual Entry Mode */}
+      {mode === "manual" && !recipe && (
+        <button onClick={handleManualStart}>📝 Start Manual Recipe</button>
+      )}
 
+      {/* Recipe Editor Preview */}
       {recipe && (
         <>
           <h3>Preview & Edit</h3>
@@ -76,6 +121,20 @@ export function AddRecipe() {
           <input
             value={recipe.title}
             onChange={(e) => setRecipe({ ...recipe, title: e.target.value })}
+            style={{ width: "100%", marginBottom: "0.5rem" }}
+          />
+
+          <label>Category:</label>
+          <input
+            value={recipe.category}
+            onChange={(e) => setRecipe({ ...recipe, category: e.target.value })}
+            style={{ width: "100%", marginBottom: "0.5rem" }}
+          />
+
+          <label>Image URL:</label>
+          <input
+            value={recipe.image}
+            onChange={(e) => setRecipe({ ...recipe, image: e.target.value })}
             style={{ width: "100%", marginBottom: "0.5rem" }}
           />
 
@@ -99,7 +158,8 @@ export function AddRecipe() {
             style={{ width: "100%", marginBottom: "1rem" }}
           />
 
-          <button onClick={handleSave}>✅ Save to Cloud</button>
+          <button onClick={handleSave}>✅ Save to Library</button>
+          {success && <p style={{ color: "green", marginTop: "1rem" }}>Saved!</p>}
         </>
       )}
     </div>

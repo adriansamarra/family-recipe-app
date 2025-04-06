@@ -1,13 +1,13 @@
 import { db } from "../firebase";
-import { collection, getDocs, setDoc, doc } from "firebase/firestore";
+import { setDoc, getDoc, doc } from "firebase/firestore";
 
 const COLLECTION_NAME = "thisWeek";
 const DOC_ID = "currentWeek";
 
 export async function getThisWeek() {
   const ref = doc(db, COLLECTION_NAME, DOC_ID);
-  const snap = await getDocs(collection(db, COLLECTION_NAME));
-  const data = snap.docs.find(d => d.id === DOC_ID)?.data();
+  const snap = await getDoc(ref);
+  const data = snap.data();
   return data?.ids || [];
 }
 
