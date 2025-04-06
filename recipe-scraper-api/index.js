@@ -6,7 +6,7 @@ const app = express();
 const PORT = 5001;
 
 // 🛠 Replace this with your actual Spoonacular API key
-const SPOONACULAR_API_KEY = "5d5f1e533c0a4c2a8a5ce399cc75e94f";
+const SPOONACULAR_API_KEY = "5d5f1e533c0a4c2a8a5ce399cc75e94f"
 
 app.use(cors());
 

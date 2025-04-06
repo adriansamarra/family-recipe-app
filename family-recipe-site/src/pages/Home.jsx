@@ -16,7 +16,7 @@ export function Home() {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h2>Recipe Library</h2>
+      <h2>🍽️ Samarra Family Recipe Library</h2>
       <input
         type="text"
         placeholder="Search recipes..."
