@@ -62,8 +62,8 @@ export function AddRecipe() {
       setRecipe(null);
       setUrl("");
     } catch (err) {
-      console.error(err);
-      alert("Failed to save recipe to the cloud.");
+      console.error("Save error:", err);
+      alert("❌ Failed to save recipe. See console for details.");
     }
   };
 
