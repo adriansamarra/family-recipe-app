@@ -1,17 +1,20 @@
 import React, { useState } from "react";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 export function AddRecipe() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [recipe, setRecipe] = useState(null);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  // 🌐 Replace this with your actual Render backend URL:
-  const SCRAPER_API = "https://family-recipe-app.onrender.com";
+  const SCRAPER_API = "https://family-recipe-app.onrender.com"; // 🔁 Replace with your Render backend URL
 
   const handleFetch = async () => {
     setLoading(true);
     setError("");
+    setSuccess(false);
     setRecipe(null);
 
     try {
@@ -22,24 +25,28 @@ export function AddRecipe() {
       setRecipe(data);
     } catch (err) {
       console.error(err.message);
-      setError("Failed to fetch recipe. Check the URL or try again.");
+      setError("Failed to fetch recipe. Please check the URL.");
     }
 
     setLoading(false);
   };
 
-  const handleSave = () => {
-    const stored = JSON.parse(localStorage.getItem("recipes")) || [];
+  const handleSave = async () => {
+    try {
+      const recipeToSave = {
+        ...recipe,
+        id: recipe.id || `firebase-${Date.now()}`,
+        timestamp: new Date()
+      };
 
-    const recipeToSave = {
-      ...recipe,
-      id: recipe.id || `local-${Date.now()}`
-    };
-
-    localStorage.setItem("recipes", JSON.stringify([...stored, recipeToSave]));
-    alert("✅ Recipe saved to library!");
-    setUrl("");
-    setRecipe(null);
+      await addDoc(collection(db, "recipes"), recipeToSave);
+      setSuccess(true);
+      setRecipe(null);
+      setUrl("");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save recipe to the cloud.");
+    }
   };
 
   return (
@@ -59,6 +66,7 @@ export function AddRecipe() {
       </button>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
+      {success && <p style={{ color: "green" }}>✅ Recipe saved to cloud!</p>}
 
       {recipe && (
         <>
@@ -91,7 +99,7 @@ export function AddRecipe() {
             style={{ width: "100%", marginBottom: "1rem" }}
           />
 
-          <button onClick={handleSave}>✅ Save to Library</button>
+          <button onClick={handleSave}>✅ Save to Cloud</button>
         </>
       )}
     </div>
