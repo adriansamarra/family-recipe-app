@@ -6,20 +6,23 @@ export function AddRecipe() {
   const [recipe, setRecipe] = useState(null);
   const [error, setError] = useState("");
 
+  // 🌐 Replace this with your actual Render backend URL:
+  const SCRAPER_API = "https://family-recipe-app.onrender.com";
+
   const handleFetch = async () => {
     setLoading(true);
     setError("");
     setRecipe(null);
 
     try {
-      const response = await fetch(`http://localhost:5001/api/scrape?url=${encodeURIComponent(url)}`);
+      const response = await fetch(`${SCRAPER_API}/api/scrape?url=${encodeURIComponent(url)}`);
       const data = await response.json();
 
       if (data.error) throw new Error(data.error);
       setRecipe(data);
     } catch (err) {
       console.error(err.message);
-      setError("Failed to fetch recipe.");
+      setError("Failed to fetch recipe. Check the URL or try again.");
     }
 
     setLoading(false);
