@@ -31,6 +31,7 @@ app.get("/api/scrape", async (req, res) => {
       id: `local-${Date.now()}`,
       title: recipe.title || "Untitled Recipe",
       category: "Imported",
+      image: recipe.image || "",
       ingredients: recipe.extendedIngredients?.map((i) => i.original) || [],
       instructions: recipe.instructions || "",
       tags: ["new"]

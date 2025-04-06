@@ -4,8 +4,6 @@ import baseRecipes from "../data/recipes.json";
 
 export function RecipeView() {
   const { id } = useParams();
-
-  // Load saved recipes from localStorage
   const localRecipes = JSON.parse(localStorage.getItem("recipes") || "[]");
   const allRecipes = [...baseRecipes, ...localRecipes];
 
@@ -22,6 +20,13 @@ export function RecipeView() {
 
   return (
     <div style={{ padding: "2rem" }}>
+      {recipe.image && (
+        <img
+          src={recipe.image}
+          alt={recipe.title}
+          style={{ maxWidth: "100%", borderRadius: "1rem", marginBottom: "1rem" }}
+        />
+      )}
       <h2>{recipe.title}</h2>
       <h4>Category: {recipe.category}</h4>
 
